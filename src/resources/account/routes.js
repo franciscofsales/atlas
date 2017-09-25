@@ -11,6 +11,7 @@ import {
     AccountHandlers,
     AccountLoginHandlers,
     AccountRegisterHandlers,
+    AccountSocialHandlers,
     AccountResetHandlers
 } from './handlers';
 
@@ -81,6 +82,22 @@ export default [
                     name: Joi.string().required(),
                     email: Joi.string().required(),
                     password: Joi.string().min(6).required()
+                }
+            }
+        }
+    },
+    {
+        path: '/social',
+        method: 'POST',
+        config: {
+            handler: {async: AccountSocialHandlers.post},
+            description: 'Create account with social',
+            tags: ['api'],
+            validate: {
+                payload: {
+                    provider: Joi.string().required().valid('facebook', 'google'),
+                    accessToken: Joi.string(),
+                    code: Joi.string()
                 }
             }
         }

@@ -10,7 +10,7 @@ import {sanitizeEmailAddress, sendTemplate as sendEmailTemplate, EmailTemplate} 
 import {hasKeys} from '../../core/utils';
 import {JWTAuthentication} from '../../core/authentication';
 import {UserStatus, ConfirmationToken, User} from '../../resources/users/models';
-
+import {AuthorizeSocial, UserSocialData} from './helpers';
 import log from './logging';
 import {AccountDetailsSerializer} from './serializers'
 
@@ -112,7 +112,61 @@ class AccountLoginHandlers {
  */
 class AccountSocialHandlers {
   static async post(request, reply) {
-    
+    // 1) Validate payload data
+    const { code, accessToken, provider } = request.payload;
+    if (!code && !accessToken) {
+      return reply(BadRequest.invalidParameters('payload', {'code': ['"code" exist'], accessToken: ['"accessToken" must exist']})).code(400);
+    }
+
+    // 2) confirm with Provider
+    try {
+      let user_data, access_token, refresh_token;
+      if (!accessToken) {
+        const res = await AuthorizeSocial(provider, code);
+        access_token = res.access_token;
+        refresh_token = res.refresh_token;
+        user_data = await UserSocialData(provider, access_token, refresh_token);
+      } else {
+        user_data = await UserSocialData(provider, access_token);
+      }
+
+      let user = {};
+
+      if ( provider == 'facebook' ) {
+        if ( user_data.picture ) {
+          user.picture = user_data.picture.data.url
+        }
+        if ( !user.auth ) {
+          user.auth = {}
+        }
+        user.name = user_data.name
+        user.auth.facebook = {
+          id: user_data.id,
+          access_token
+        }
+        if ( code ) {
+          user.auth.facebook.refresh_token = refresh_token
+        }
+      }
+      else if( provider == 'google' ) {
+        if ( user_data.image ) {
+          user.picture = user_data.image.url
+        }
+        if(!user.auth) {
+          user.auth = {}
+        }
+        user.name = user_data.displayName
+        user.auth.google = {
+          id: user_data.id,
+          access_token, refresh_token
+        }
+      }
+
+      const newUser = await User.saveSocial(user, provider);
+      return reply({authToken: JWT.sign({id: newUser.id}, JWTAuthentication.getPrivateKey())}).code(201);
+    }
+  } catch (err) {
+      log.error(err, 'Unable to create social user');
   }
 }
 

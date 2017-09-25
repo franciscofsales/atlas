@@ -121,6 +121,34 @@ class User {
     }
 
     /**
+     * Create/Update a new user social account
+     */
+    @DBDecorators.table(tables.User)
+    static async saveSocial(obj, provider) {
+
+        let user =
+          provider === 'facebook' && await User.getByFacebookId(obj.auth.facebook.id) ||
+          provider == 'google' && await User.getByGoogleId( obj.auth.google.id );
+
+        if(user) {
+          // Update user
+          await this.table.get(userId).update(obj).run();
+
+          // Fetch user's latest state and return.
+          return (
+            provider === 'facebook' && await User.getByFacebookId(obj.auth.facebook.id) ||
+            provider == 'google' && await User.getByGoogleId( obj.auth.google.id )
+          );
+        }
+        else {
+          // Insert user into database
+          let insert = await this.table.insert(obj).run();
+          // Get user object and return it
+          return await this.table.get(insert.generated_keys[0]).run();
+        }
+    }
+
+    /**
      * Return users collection
      */
     @DBDecorators.table(tables.User)
@@ -153,6 +181,50 @@ class User {
             return users[0];
         } else if (users.length > 1) {
             throw new Error(`More than one user with "${email}" email address`);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return user with given facebook id
+     */
+    @DBDecorators.table(tables.User)
+    static async getByFacebookId(id) {
+
+        // Filter database for users with given facebook id
+        let users = await this.table.filter(rethinkdb.row('auth')('facebook')('id').eq(id)).run();
+
+        // Result:
+        // a) Single user matches, return it
+        // b) More than one user matches, throw an error
+        // c) No user matches email, return null
+        if (users.length == 1) {
+            return users[0];
+        } else if (users.length > 1) {
+            throw new Error(`More than one user with "${id}" facebook`);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return user with given google id
+     */
+    @DBDecorators.table(tables.User)
+    static async getByGoogleId(id) {
+
+        // Filter database for users with given google id
+        let users = await this.table.filter(rethinkdb.row('auth')('google')('id').eq(id)).run();
+
+        // Result:
+        // a) Single user matches, return it
+        // b) More than one user matches, throw an error
+        // c) No user matches email, return null
+        if (users.length == 1) {
+            return users[0];
+        } else if (users.length > 1) {
+            throw new Error(`More than one user with "${id}" google`);
         } else {
             return null;
         }

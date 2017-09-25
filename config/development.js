@@ -50,5 +50,15 @@ export default {
     mailgun: {
         domain: process.env.MAILGUN_DOMAIN,
         apiKey: process.env.MAILGUN_API_KEY
+    },
+    facebook: {
+      clientId: process.env.AUTH_PROVIDER_FACEBOOK_ID,
+      clientSecret: process.env.AUTH_PROVIDER_FACEBOOK_SECRET,
+      redirectUri: process.env.AUTH_PROVIDER_FACEBOOK_REDIRECT
+    },
+    google: {
+      clientId: process.env.AUTH_PROVIDER_GOOGLE_ID,
+      clientSecret: process.env.AUTH_PROVIDER_GOOGLE_SECRET,
+      redirectUri: process.env.AUTH_PROVIDER_GOOGLE_REDIRECT
     }
 }
