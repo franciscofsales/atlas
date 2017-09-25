@@ -164,9 +164,9 @@ class AccountSocialHandlers {
 
       const newUser = await User.saveSocial(user, provider);
       return reply({authToken: JWT.sign({id: newUser.id}, JWTAuthentication.getPrivateKey())}).code(201);
-    }
-  } catch (err) {
+    } catch (err) {
       log.error(err, 'Unable to create social user');
+    }
   }
 }
 
@@ -383,5 +383,6 @@ export {
     AccountHandlers,
     AccountLoginHandlers,
     AccountRegisterHandlers,
-    AccountResetHandlers
+    AccountResetHandlers,
+    AccountSocialHandlers
 };
