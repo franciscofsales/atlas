@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "E-Commerce Backend API",
   "private": false,
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/yoonic/atlas.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yoonic/atlas.git"
   },
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "babel": "5.8.38",
-    "bcrypt": "0.8.5",
+    "bcryptjs": "^2.4.3",
     "bunyan": "1.8.0",
     "fast-csv": "1.1.0",
     "handlebars": "^4.0.5",
