@@ -108,6 +108,15 @@ class AccountLoginHandlers {
 }
 
 /**
+ * Handlers for the Account Social endpoint
+ */
+class AccountSocialHandlers {
+  static async post(request, reply) {
+    
+  }
+}
+
+/**
  * Handlers for the Account Register endpoint
  */
 class AccountRegisterHandlers {
