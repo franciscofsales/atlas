@@ -256,10 +256,111 @@ class ProductsUploadHandler {
 }
 
 /**
+ * API handler for Product search endpoint
+ */
+class ProductSearchHandler {
+
+    /**
+     * Process GET request
+     * Return the products's collection filtered
+     */
+    static async get(request, reply) {
+
+        //
+        // Only authenticated Admins can see products that are not enabled
+        //
+        let isAdmin = request.auth.credentials && request.auth.credentials.scope && request.auth.credentials.scope.indexOf('admin') !== -1;
+        let enabled = !isAdmin;
+
+        //
+        // Pagination
+        //
+        let perPage = 200; // Default
+        let page = 0; // Default (IMPORTANT: 0 internally corresponds to 1 in request!)
+
+        if (request.query.perPage) {
+            if (isNaN(parseInt(request.query.perPage))) {
+                return reply(BadRequest.invalidParameters('query', {perPage: 'Must be an integer'})).code(400);
+            } else if (parseInt(request.query.perPage) < 1 || parseInt(request.query.perPage) > perPage) {
+                return reply(BadRequest.invalidParameters('query', {perPage: 'Invalid'})).code(400);
+            } else {
+                perPage = parseInt(request.query.perPage);
+            }
+        }
+
+        if (request.query.page) {
+            if (isNaN(parseInt(request.query.page))) {
+                return reply(BadRequest.invalidParameters('query', {page: 'Must be an integer'})).code(400);
+            } else if (parseInt(request.query.page) < 1) {
+                return reply(BadRequest.invalidParameters('query', {page: 'Invalid'})).code(400);
+            } else {
+                page = parseInt(request.query.page) - 1; // Because page 1 requested is equivalent to 0 internally
+            }
+        }
+
+        //
+        // Sorting
+        //
+        let sort = null;
+        if (request.query.sort && request.query.sort !== '') {
+            if (['sku', '-sku', 'alphabetically', '-alphabetically', 'price', '-price', 'date', '-date'].indexOf(request.query.sort) === -1) {
+                return reply(BadRequest.invalidParameters('query', {sort: 'Invalid'})).code(400);
+            } else {
+                sort = request.query.sort;
+            }
+        }
+
+        //
+        // Fetch items
+        //
+        let results = await Product.search({
+            term: (request.query.term !== '') ? request.query.term : null,
+            collections: request.query.collections ? request.query.collections.split(',') : null,
+            tags: request.query.tags ? request.query.tags.split(',') : null,
+            perPage: perPage,
+            page: page,
+            sort: sort
+        }, enabled);
+
+        // Return
+        let serializedItems = await * results.items.map(product => new ProductSerializer(product).serialize());
+        return reply({
+            items: serializedItems,
+            pagination: {
+                totalItems: results.count,
+                totalPages: Math.ceil(results.count / perPage),
+                perPage: perPage,
+                page: page+1 // Because page 1 requested is equivalent to 0 internally
+            }
+        });
+    }
+
+    /**
+     * Process POST request
+     * Create a new product
+     */
+    static async post(request, reply) {
+        try {
+            let product = await Product.create(request.payload);
+            return reply(await new ProductSerializer(product).serialize()).code(201);
+        } catch (err) {
+            if (err.name === ErrorName.VALIDATION_ERROR) {
+                return reply(BadRequest.invalidParameters('payload', {[err.param]: [err.message]})).code(400);
+            } else {
+                log.error(err, 'Unable to create product');
+                return reply().code(500);
+            }
+        }
+
+    }
+}
+
+/**
  * Exports
  */
 export {
     ProductsHandler,
     ProductIdHandler,
-    ProductsUploadHandler
+    ProductsUploadHandler,
+    ProductSearchHandler
 };

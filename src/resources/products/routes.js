@@ -7,7 +7,8 @@ import Joi from 'joi';
 import {
     ProductsHandler,
     ProductIdHandler,
-    ProductsUploadHandler
+    ProductsUploadHandler,
+    ProductSearchHandler
 } from './handlers';
 
 /**
@@ -31,6 +32,32 @@ export default [
                 }).unknown(),
                 query: {
                     sku: Joi.string().optional(),
+                    collections: Joi.string().optional(),
+                    tags: Joi.string().optional(),
+                    sort: Joi.string().optional(),
+                    perPage: Joi.string().optional(),
+                    page: Joi.string().optional()
+                }
+            }
+        }
+    },
+    {
+        path: '/search',
+        method: 'GET',
+        config: {
+            handler: {async: ProductSearchHandler.get},
+            auth: {
+                mode: 'try',
+                strategy: 'jwt'
+            },
+            description: 'Get products collection',
+            tags: ['api'],
+            validate: {
+                headers: Joi.object({
+                    'authorization': Joi.string().optional()
+                }).unknown(),
+                query: {
+                    term: Joi.string().optional(),
                     collections: Joi.string().optional(),
                     tags: Joi.string().optional(),
                     sort: Joi.string().optional(),

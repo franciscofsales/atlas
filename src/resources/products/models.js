@@ -128,6 +128,79 @@ class Product {
     }
 
     /**
+     * Return products collection
+     */
+    @DBDecorators.table(tables.Product)
+    static async search({term=null, collections=null, tags=null, perPage=null, page=null, sort=null}, enabled) {
+
+        // Build query
+        let query = this.table.filter((enabled === true) ? {enabled: true} : {});
+        if (term) {
+            query = query.filter(doc => doc('name').match(term));
+        }
+        if (collections) {
+            query = query.filter(function (product) {
+                return product('collections').contains(...collections);
+            });
+        }
+        if (tags) {
+            query = query.filter(function (product) {
+                return product('tags').contains(...tags);
+            });
+        }
+
+        // Sort
+        if (sort) {
+            switch (sort) {
+                case 'sku':
+                    query = query.orderBy(rethinkdb.asc('sku'));
+                    break;
+                case '-sku':
+                    query = query.orderBy(rethinkdb.desc('sku'));
+                    break;
+                case 'alphabetically':
+                    query = query.orderBy(rethinkdb.asc('name'));
+                    break;
+                case '-alphabetically':
+                    query = query.orderBy(rethinkdb.desc('name'));
+                    break;
+                case 'price':
+                    query = query.orderBy(rethinkdb.asc(rethinkdb.row('pricing')('retail')));
+                    break;
+                case '-price':
+                    query = query.orderBy(rethinkdb.desc(rethinkdb.row('pricing')('retail')));
+                    break;
+                case 'date':
+                    query = query.orderBy(rethinkdb.asc('updatedAt'));
+                    break;
+                case '-date':
+                    query = query.orderBy(rethinkdb.desc('updatedAt'));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Count the number of items that match query
+        let count = await query.count().run();
+
+        // Paginated query
+        if (perPage !== null && page !== null) {
+            query = query.skip(page*perPage).limit(perPage);
+        }
+
+        // Execute query
+        let items = await query.run();
+
+        // Return
+        return {
+            items: items,
+            count: count
+        }
+    }
+
+
+    /**
      * Return product with given ID
      */
     @DBDecorators.table(tables.Product)
