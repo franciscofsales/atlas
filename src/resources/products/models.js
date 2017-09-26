@@ -136,7 +136,12 @@ class Product {
         // Build query
         let query = this.table.filter((enabled === true) ? {enabled: true} : {});
         if (term) {
-            query = query.filter(doc => doc('name').match(term));
+            query = query.filter(product =>
+              product('name')('en').match(`(?i)${term}`)
+                .or(product('name')('pt').match(`(?i)${term}`))
+                .or(product('description')('en').match(`(?i)${term}`))
+                .or(product('description')('pt').match(`(?i)${term}`))
+            );
         }
         if (collections) {
             query = query.filter(function (product) {
