@@ -32,5 +32,26 @@ export default [
                 }
             }
         }
-    }
+    },
+    {
+        path: '/{userId}',
+        method: 'GET',
+        config: {
+            handler: {async: UsersHandler.retrieve},
+            auth: {
+                mode: 'try',
+                strategy: 'jwt'
+            },
+            description: 'Get user',
+            tags: ['api'],
+            validate: {
+                headers: Joi.object({
+                    'authorization': Joi.string().optional()
+                }).unknown(),
+                params: {
+                    userId: Joi.string().required().description('the id for the user'),
+                }
+            }
+        }
+    },
 ];

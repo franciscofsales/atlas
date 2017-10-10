@@ -13,7 +13,15 @@ class UsersHandler {
      * Return the user's collection
      */
     static async get(request, reply) {
-        return reply({items: await User.find()});
+      return reply({items: await User.find()});
+    }
+
+    /**
+     * Process GET request
+     * Return the user's info
+     */
+    static async retrieve(request, reply) {
+      return reply(await User.get(request.params.userId));
     }
 }
 
