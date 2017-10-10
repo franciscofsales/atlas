@@ -54,4 +54,29 @@ export default [
             }
         }
     },
+    {
+        path: '/{userId}',
+        method: 'PATCH',
+        config: {
+            handler: {async: UsersHandler.patch},
+            auth: {
+                strategy: 'jwt',
+                scope: ['admin']
+            },
+            description: 'Partial user update',
+            tags: ['api'],
+            validate: {
+                headers: Joi.object({
+                    'authorization': Joi.string().required()
+                }).unknown(),
+                params: {
+                    userId: Joi.string().required().description('the id for the user'),
+                },
+                payload: {
+                    notes: Joi.string(),
+                    status: Joi.string().valid('inactive', 'active', 'pendingConfirmation')
+                }
+            }
+        }
+    },
 ];

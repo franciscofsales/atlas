@@ -61,7 +61,8 @@ class User {
             password: passwordHash,
             addresses: [],
             confirmationTokens: [],
-            createdAt: new Date()
+            createdAt: new Date(),
+            notes: null
         };
         let insert = await this.table.insert(obj).run();
 
@@ -196,14 +197,21 @@ class User {
      * Update basic user details
      */
     @DBDecorators.table(tables.User)
-    static async updateDetails(userId, {name=null}) {
+    static async updateDetails(userId, {name=null, notes=null, status=null}) {
 
         let details = {updatedAt: new Date()};
         if (name) {
             details.name = name;
         }
+        if (notes) {
+          details.notes = notes;
+        }
+        if (status) {
+          details.status = status;
+        }
 
         // Update user
+        console.log(details);
         await this.table.get(userId).update(details).run();
 
         // Fetch user's latest state and return.
