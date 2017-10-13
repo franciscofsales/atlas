@@ -16,7 +16,8 @@ const tables = {
  */
 const ContentType = {
     ARTICLE: 'article',
-    BANNER: 'banner'
+    BANNER: 'banner',
+    IMAGE: 'image'
 };
 
 /**
@@ -30,6 +31,8 @@ const ContentBodyBase = {
     [ContentType.BANNER]: {
         image: {},
         link: ''
+    },
+    [ContentType.IMAGE]: {
     }
 };
 
