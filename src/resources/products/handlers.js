@@ -225,7 +225,8 @@ class ProductsUploadHandler {
                                 retail: parseFloat(row['retailPrice']),
                                 vat: parseInt(row['vat'])
                             },
-                            stock: parseInt(row['stock'])
+                            stock: parseInt(row['stock']),
+                            variants: row['variants']
                         });
                     }
                 })

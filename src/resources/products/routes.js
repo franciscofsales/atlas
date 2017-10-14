@@ -154,7 +154,8 @@ export default [
                     stock: Joi.number().required(),
                     tags: Joi.array().required(),
                     collections: Joi.array().required(),
-                    metadata: Joi.object().required()
+                    metadata: Joi.object().required(),
+                    variants: Joi.array()
                 }
             }
         }
