@@ -201,7 +201,7 @@ class Cart {
      * Update cart product
      */
     @DBDecorators.table(tables.Cart)
-    static async updateProduct(cartId, productId, quantity) {
+    static async updateProduct(cartId, productId, quantity, variantId = null) {
 
         let cart = await Cart.get(cartId);
 
@@ -209,13 +209,16 @@ class Cart {
         let index = null;
         for (let i=0; i<cart.products.length; i++) {
             if (cart.products[i].id === productId) {
+                if(variantId && variantId !== cart.products[i].variantId){
+                    continue;
+                }
                 index = i;
                 break;
             }
         }
         if (index === null && quantity > 0) {
             log.debug({productId, quantity}, 'Adding product to cart');
-            cart.products.push({id: productId, quantity: quantity});
+            cart.products.push({id: productId, quantity: quantity, variantId});
         } else {
             if (quantity == 0) { // Remove from cart
                 log.debug({productId}, 'Removing product from cart');
@@ -229,7 +232,7 @@ class Cart {
         // Update cart
         await this.table.get(cartId).update({
             products: cart.products,
-            updatedAt: new Date()
+            updatedAt: new Date(),
         }).run();
 
         // Fetch cart's latest state and return.

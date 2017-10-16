@@ -1,6 +1,7 @@
 /**
  * Imports
  */
+import uuid from 'node-uuid';
 import config from '../../config';
 import {rethinkdb, Decorators as DBDecorators} from '../../core/db';
 import {ValidationError} from '../../core/errors';
@@ -275,6 +276,15 @@ class Product {
             let product = await Product.getBySKU(sku);
             if (product && product.id !== productId) {
                 throw new ValidationError('sku', `The SKU "${sku}" is already registered with another product`);
+            }
+        }
+
+        // if a new variant, generate ID for it
+        if (variants && variants.length) {
+            for (let [idx, variant] of variants.entries()) {
+                if(!variant.id){
+                    variants[idx].id = uuid.v4();
+                }
             }
         }
 

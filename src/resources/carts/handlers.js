@@ -84,7 +84,7 @@ class CartIdHandler {
             if (request.payload.archive === true) {
                 cart = await Cart.archive(cartId);
             }
-        } else if (hasKeys(request.payload, ['product'])) {
+        } else if (hasKeys(request.payload, ['product'], true)) {
             if (!request.payload.product.hasOwnProperty('id') || request.payload.product.id === '') {
                 return reply(BadRequest.invalidParameters('payload', {'product.id': ['This field is required']})).code(400);
             } else if (!request.payload.product.hasOwnProperty('quantity') || request.payload.product.quantity === '') {
@@ -98,7 +98,13 @@ class CartIdHandler {
                 } else if (product.stock < request.payload.product.quantity) {
                     return reply(BadRequest.invalidParameters('payload', {'product.quantity': ['Not enough in stock']})).code(400);
                 } else {
-                    cart = await Cart.updateProduct(cartId, request.payload.product.id, request.payload.product.quantity);
+                    if(request.payload.variant.id){
+                        const variant = product.variants.find(varint => varint.id === request.payload.variant.id);
+                        if(variant.stock < request.payload.product.quantity){
+                            return reply(BadRequest.invalidParameters('payload', {'product.quantity': ['Not enough in stock']})).code(400);
+                        }
+                    }
+                    cart = await Cart.updateProduct(cartId, request.payload.product.id, request.payload.product.quantity, request.payload.variant.id);
                 }
             }
         } else {
