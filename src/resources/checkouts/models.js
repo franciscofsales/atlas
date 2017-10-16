@@ -215,8 +215,13 @@ class Checkout {
      */
     getSubTotal() {
         let amount = 0;
-        this.model.cart.products.forEach(function (product) {
-            amount += product.quantity * product.details.pricing.retail;
+        this.model.cart.products.forEach( product => {
+            if(product.variantId){
+                let variant = product.details.variants.find(varint => varint.id === product.variantId);
+                amount += product.quantity * variant.pricing.retail;
+            } else {
+                amount += product.quantity * product.details.pricing.retail;
+            }
         });
         return amount;
     }
