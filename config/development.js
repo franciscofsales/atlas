@@ -32,8 +32,8 @@ export default {
     },
     emails: {
         from: {
-            name: 'Nicistore.com',
-            email: 'vendas@nicistore.com'
+            name: 'dicci.eu',
+            email: 'geral@dicci.eu'
         }
     },
     storefront: {
@@ -42,10 +42,14 @@ export default {
         defaultLocale: 'pt'
     },
     switchPayments: {
-        enabled: true,
+        enabled: false,
         baseUrl: 'https://api-test.switchpayments.com/v2',
         accountId: process.env.SWITCH_ACCOUNT_ID,
         privateKey: process.env.SWITCH_PRIVATE_KEY
+    },
+    stripe: {
+        enabled: true,
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
     },
     mailgun: {
         domain: process.env.MAILGUN_DOMAIN,
